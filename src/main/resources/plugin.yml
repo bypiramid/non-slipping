@@ -1,0 +1,6 @@
+main: ${group}.bukkit.BukkitMain
+name: ${name}
+description: ${description}
+version: ${version}
+authors: ${authors}
+website: ${website}
