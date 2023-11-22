@@ -1,4 +1,4 @@
-main: ${group}.bukkit.BukkitMain
+main: ${group}.Main
 name: ${name}
 description: ${description}
 version: ${version}
