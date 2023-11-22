@@ -3,7 +3,11 @@ plugins {
 }
 
 group = "net.bypiramid.nonslipping"
-version = "2.0-SNAPSHOT"
+version = "git-2.0.1-SNAPSHOT"
+description = "Intelligent engineering that identifies your prison in blocks with no escape conditions."
+
+val website: String by extra { "https://github.com/bypiramid/non-slipping" }
+val authors: Array<String> by extra { arrayOf("comicxz", "Gabriel Bruck", "unidade", "deleyy") }
 
 tasks.withType<JavaCompile> {
     sourceCompatibility = "1.8"
@@ -20,4 +24,10 @@ dependencies {
         exclude(group = "net.md-5", module = "bungeecord-chat")
     }
     compileOnly("com.github.azbh111:craftbukkit-1.8.8:R")
+}
+
+tasks.processResources {
+    filesMatching("plugin.yml") {
+        expand(project.properties)
+    }
 }
