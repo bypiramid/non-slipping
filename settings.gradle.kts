@@ -1,2 +1,2 @@
-rootProject.name = "NonSlipping"
+rootProject.name = "non-slipping"
 
