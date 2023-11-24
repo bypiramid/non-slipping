@@ -7,7 +7,7 @@ import net.bypiramid.commandmanager.common.argument.Argument;
 import net.bypiramid.commandmanager.common.context.Context;
 import net.bypiramid.commandmanager.common.parameter.Param;
 import net.bypiramid.commandmanager.common.parameter.ParamInfo;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 
 import java.lang.reflect.Method;
 import java.util.*;
