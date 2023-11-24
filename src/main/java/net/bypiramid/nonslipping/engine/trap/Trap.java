@@ -66,7 +66,7 @@ public class Trap {
             return false;
         }
 
-        teleportCooldown = new Cooldown(0.3);
+        teleportCooldown = new Cooldown(0.1);
         player.teleport(center, PlayerTeleportEvent.TeleportCause.PLUGIN);
         return false;
     }
