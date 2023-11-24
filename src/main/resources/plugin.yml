@@ -1,5 +1,5 @@
 main: ${group}.Main
-name: ${name}
+name: ${pluginName}
 description: ${description}
 version: ${version}
 authors: ${authors}
