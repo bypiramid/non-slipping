@@ -1,12 +1,17 @@
 package net.bypiramid.nonslipping.util;
 
-import net.bypiramid.nonslipping.engine.function.BlockTypePredicate;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.NumberConversions;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class BlockUtils {
+
+    public static final List<Integer> fenceTypeIds = Arrays.asList(85, 113, 139, 183, 184, 185, 186,
+            187, 188, 189, 190, 191, 192);
 
     public static Location getBlockCenter(Block block) {
         return block.getLocation().clone().add(0.5, 0, 0.5);
@@ -23,7 +28,7 @@ public class BlockUtils {
     public static Block getStuckBlock(Location playerLocation) {
         Block stuckBlock = playerLocation.getBlock().getRelative(BlockFace.UP);
 
-        if (!BlockTypePredicate.SOLID.test(stuckBlock)) {
+        if (!stuckBlock.getType().isSolid()) {
             return null;
         }
 

@@ -47,6 +47,12 @@ public class BlockIterator implements Iterator<Block> {
 
         private List<BlockFilter> elements = new ArrayList<>();
 
+        public Builder withFilters(BlockFilter... blockFilters) {
+            for (BlockFilter blockFilter : blockFilters)
+                elements.add(blockFilter);
+            return this;
+        }
+
         public Builder withFilter(BlockFilter blockFilter) {
             elements.add(blockFilter);
             return this;

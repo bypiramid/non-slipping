@@ -5,27 +5,19 @@ import org.bukkit.block.Block;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class BlockExtractor {
 
     private Block mainBlock;
-    private Iterator<Block> blockIterator;
     private List<Block> blockExtractions = new ArrayList<>();
 
-    public BlockExtractor(Block mainBlock, BlockFilter... blockFilters) {
-        BlockIterator.Builder iteratorBuilder = BlockIterator.builder();
-
-        for (BlockFilter blockFilter : blockFilters) {
-            iteratorBuilder.withFilter(blockFilter);
-        }
-
-        this.blockIterator = iteratorBuilder.build(this.mainBlock = mainBlock);
-
-        extractBlocks();
+    public BlockExtractor(Block mainBlock) {
+        this.mainBlock = mainBlock;
     }
 
-    private void extractBlocks() {
+    public void filterAndExtract(BlockFilter... blockFilters) {
+        BlockIterator blockIterator = BlockIterator.builder().withFilters(blockFilters)
+                .build(mainBlock);
         while (blockIterator.hasNext()) {
             Block next = blockIterator.next();
             if (next != null) {

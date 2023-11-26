@@ -1,73 +1,38 @@
 package net.bypiramid.nonslipping.engine.trap;
 
-import net.bypiramid.nonslipping.util.Cooldown;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.material.MaterialData;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class Trap {
 
-    public static final double MAX_DISTANCE_MOVABLE_INSIDE_TRAP = 0.637D;
-    public static final double MAX_DISTANCE_MOVABLE_INSIDE_TRAP_WITH_BLOCK_IN_FACE = 0.9D;
-
     private Player player;
-    private Location center;
-    private MaterialData inputBlockData;
-    private Block stuckBlock;
-    private Cooldown teleportCooldown;
+    private Block center;
+    private Set<Block> walls = new HashSet<>();
 
-    public Trap(Player player, Location center, MaterialData inputBlockData, Block stuckBlock) {
+    public Trap(Player player, Block center) {
         this.player = player;
         this.center = center;
-        this.inputBlockData = inputBlockData;
-        this.stuckBlock = stuckBlock;
     }
 
-    public Location getCenter() {
+    public Block getCenter() {
         return center;
     }
 
-    public void setCenter(Location center) {
-        this.center = center;
+    public Set<Block> getWalls() {
+        return walls;
     }
 
-    public MaterialData getInputBlockData() {
-        return inputBlockData;
+    public void addWall(Block block) {
+        walls.add(block);
     }
 
-    public void setMaterialData(MaterialData inputBlockData) {
-        this.inputBlockData = inputBlockData;
-    }
+    public void undo() {
+        center = null;
 
-    public Block getStuckBlock() {
-        return stuckBlock;
-    }
-
-    public boolean hasStuckBlock() {
-        return stuckBlock != null;
-    }
-
-    public void setStuckBlock(Block stuckBlock) {
-        this.stuckBlock = stuckBlock;
-    }
-
-    public boolean exists() {
-        return false;
-    }
-
-    public boolean moveToCenter() {
-        if (!player.isOnline()) {
-            return false;
-        }
-
-        if (teleportCooldown != null && !teleportCooldown.expired()) {
-            return false;
-        }
-
-        teleportCooldown = new Cooldown(0.1);
-        player.teleport(center, PlayerTeleportEvent.TeleportCause.PLUGIN);
-        return false;
+        walls.clear();
+        walls = null;
     }
 }
