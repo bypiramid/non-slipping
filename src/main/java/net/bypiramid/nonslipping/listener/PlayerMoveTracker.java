@@ -125,8 +125,7 @@ public class PlayerMoveTracker implements Listener {
                         Block face1 = inDirection.getRelative(reference.getRefA());
                         Block face2 = inDirection.getRelative(reference.getRefB());
 
-                        if (manager.isFenceType(face1) && manager.isFenceType(face2)
-                                && !inDirection.getType().isSolid()) {
+                        if (manager.isFenceType(face1) && manager.isFenceType(face2)) {
                             trap.updateCenter(to.getBlock());
                             return;
                         }
