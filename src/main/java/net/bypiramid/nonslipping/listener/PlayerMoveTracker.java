@@ -3,6 +3,7 @@ package net.bypiramid.nonslipping.listener;
 import net.bypiramid.nonslipping.engine.manager.Manager;
 import net.bypiramid.nonslipping.engine.trap.Trap;
 import net.bypiramid.nonslipping.util.BlockUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -11,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -39,7 +41,7 @@ public class PlayerMoveTracker implements Listener {
             return;
         }
 
-        if (player.isDead() || flyEnabled) {
+        if (flyEnabled) {
             manager.removeTrap(player);
             trap.undo();
             return;
@@ -54,14 +56,17 @@ public class PlayerMoveTracker implements Listener {
 
             if (manager.isFenceType(wall)
                     || manager.isFenceType(wall.getRelative(BlockFace.DOWN, 1))
-                    || manager.isFenceType(relativeUp) || wall.getType().isSolid()
-                    || relativeUp.getType().isSolid()) {
+                    || manager.isFenceType(relativeUp)
+                    || wall.getType().isSolid()
+                    || relativeUp.getType().isSolid())
                 blockedPaths++;
-            }
         }
+
+        Bukkit.broadcastMessage("Paths: " + blockedPaths);
 
         if (blockedPaths == 4 || (trap.getWalls().stream().allMatch(block -> block.getType()
                 .isSolid()) && stuckBlock != null)) {
+
             Location to = event.getTo();
 
             Location center;
@@ -106,11 +111,18 @@ public class PlayerMoveTracker implements Listener {
                     event.setTo(center);
                 }
             } else {
-                manager.removeTrap(player);
-                trap.undo();
+                trap.updateCenter(to.getBlock());
             }
         } else {
             manager.removeTrap(player);
+            trap.undo();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Trap trap = manager.removeTrap(event.getEntity());
+        if (trap != null) {
             trap.undo();
         }
     }
