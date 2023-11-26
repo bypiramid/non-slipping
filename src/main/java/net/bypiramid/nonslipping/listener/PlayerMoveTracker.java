@@ -62,8 +62,6 @@ public class PlayerMoveTracker implements Listener {
                 blockedPaths++;
         }
 
-        Bukkit.broadcastMessage("Paths: " + blockedPaths);
-
         if (blockedPaths == 4 || (trap.getWalls().stream().allMatch(block -> block.getType()
                 .isSolid()) && stuckBlock != null)) {
 
