@@ -39,7 +39,7 @@ public class PlayerMoveTracker implements Listener {
             return;
         }
 
-        if (!player.isDead() || flyEnabled) {
+        if (player.isDead() || flyEnabled) {
             manager.removeTrap(player);
             trap.undo();
             return;
