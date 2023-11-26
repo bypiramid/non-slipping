@@ -1,8 +1,11 @@
 package net.bypiramid.nonslipping.listener;
 
+import com.google.common.collect.Sets;
 import net.bypiramid.nonslipping.engine.manager.Manager;
 import net.bypiramid.nonslipping.engine.trap.Trap;
+import net.bypiramid.nonslipping.util.BiReference;
 import net.bypiramid.nonslipping.util.BlockUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -58,31 +61,14 @@ public class PlayerMoveTracker implements Listener {
         Block stuckBlock = BlockUtils.getStuckBlock(trap.getCenter().getLocation());
 
         int blockedPaths = 0;
-        int consecutiveFences = 0;
-
-        Block[] foundConsFences = new Block[4];
-        int foundIndex = 0;
-
-        Set<Location> notFence = new HashSet<>();
-
-        trap.getWalls().stream().filter(block -> !manager.isFenceType(block))
-                .forEach(block -> notFence.add(block.getLocation()));
 
         for (Block wall : trap.getWalls()) {
             Block relativeUp = wall.getRelative(BlockFace.UP);
             Block groundDown = wall.getRelative(BlockFace.DOWN);
 
-            boolean isGroundWallFence = manager.isFenceType(groundDown);
-
-            if (isGroundWallFence) {
-                foundConsFences[foundIndex] = groundDown;
-                ++foundIndex;
-                ++blockedPaths;
-                continue;
-            }
-
-            if (manager.isFenceType(relativeUp) || manager.isFenceType(wall) ||
-                    wall.getType().isSolid() || relativeUp.getType().isSolid()) {
+            if (manager.isFenceType(groundDown) || manager.isFenceType(relativeUp)
+                    || manager.isFenceType(wall) || wall.getType().isSolid()
+                    || relativeUp.getType().isSolid()) {
                 blockedPaths++;
             }
         }
@@ -127,14 +113,20 @@ public class PlayerMoveTracker implements Listener {
                     }
                 }
             } else if (trap.getCenter().getRelative(BlockFace.UP, 2).getType().isSolid()) {
-                if (blockedPaths == 4 && getArrayLength(foundConsFences) >= 2) {
-                    BlockFace facing = yawToFace(to.getYaw()).getOppositeFace();
+                BlockFace facing = yawToFace(to.getYaw()).getOppositeFace();
 
-                    if (facing.name().contains("_")) {
-                        Block base = trap.getCenter().getRelative(BlockFace.DOWN);
-                        Block inDirection = base.getRelative(facing);
+                if (facing.name().contains("_")) {
+                    Block base = trap.getCenter().getRelative(BlockFace.DOWN);
+                    Block inDirection = base.getRelative(facing);
 
-                        if (!inDirection.getType().isSolid()) {
+                    BiReference<BlockFace, BlockFace> reference = getBlockFace(facing);
+
+                    if (reference != null && !inDirection.getType().isSolid()) {
+                        Block face1 = inDirection.getRelative(reference.getRefA());
+                        Block face2 = inDirection.getRelative(reference.getRefB());
+
+                        if (manager.isFenceType(face1) && manager.isFenceType(face2)
+                                && !inDirection.getType().isSolid()) {
                             trap.updateCenter(to.getBlock());
                             return;
                         }
@@ -220,5 +212,20 @@ public class PlayerMoveTracker implements Listener {
 
     public <T> int getArrayLength(T[] array) {
         return (int) Stream.of(array).filter(Objects::nonNull).count();
+    }
+
+    public BiReference<BlockFace, BlockFace> getBlockFace(BlockFace facing) {
+        switch (facing) {
+            case NORTH_EAST:
+                return new BiReference<>(BlockFace.WEST, BlockFace.SOUTH);
+            case SOUTH_EAST:
+                return new BiReference<>(BlockFace.NORTH, BlockFace.WEST);
+            case SOUTH_WEST:
+                return new BiReference<>(BlockFace.EAST, BlockFace.NORTH);
+            case NORTH_WEST:
+                return new BiReference<>(BlockFace.SOUTH, BlockFace.EAST);
+            default:
+                return null;
+        }
     }
 }
