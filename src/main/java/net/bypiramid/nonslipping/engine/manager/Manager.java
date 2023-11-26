@@ -56,16 +56,16 @@ public class Manager {
         Block mainBlock = from.getBlock();
 
         BlockFilter north_1 = new BlockFilter(BlockFace.NORTH, 1, true);
-        BlockFilter south_1 = new BlockFilter(BlockFace.SOUTH, 1, true);
         BlockFilter east_1 = new BlockFilter(BlockFace.EAST, 1, true);
+        BlockFilter south_1 = new BlockFilter(BlockFace.SOUTH, 1, true);
         BlockFilter west_1 = new BlockFilter(BlockFace.WEST, 1, true);
 
         BlockFilter down_1 = new BlockFilter(BlockFace.DOWN, 1, false);
         BlockExtractor extractor = new BlockExtractor(mainBlock);
 
         extractor.filterAndExtract(north_1, down_1);
-        extractor.filterAndExtract(south_1, down_1);
         extractor.filterAndExtract(east_1, down_1);
+        extractor.filterAndExtract(south_1, down_1);
         extractor.filterAndExtract(west_1, down_1);
 
         List<Block> matchedBlocks = extractor.matchedBlocks(block -> !block.isEmpty());
