@@ -121,7 +121,7 @@ public class PlayerMoveTracker implements Listener {
 
                     BiReference<BlockFace, BlockFace> reference = getBlockFace(facing);
 
-                    if (reference != null && !inDirection.getType().isSolid()) {
+                    if (reference != null && !manager.isFenceType(inDirection)) {
                         Block face1 = inDirection.getRelative(reference.getRefA());
                         Block face2 = inDirection.getRelative(reference.getRefB());
 
