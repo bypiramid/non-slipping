@@ -21,10 +21,6 @@ public class Trap {
         return center;
     }
 
-    public void updateCenter(Block center) {
-        this.center = center;
-    }
-
     public Set<Block> getWalls() {
         return walls;
     }

@@ -53,8 +53,7 @@ public class PlayerMoveTracker implements Listener {
         }
 
         if (flyEnabled) {
-            manager.removeTrap(player);
-            trap.undo();
+            removeTrap(player);
             return;
         }
 
@@ -125,8 +124,19 @@ public class PlayerMoveTracker implements Listener {
                         Block face1 = inDirection.getRelative(reference.getRefA());
                         Block face2 = inDirection.getRelative(reference.getRefB());
 
-                        if (manager.isFenceType(face1) && manager.isFenceType(face2)) {
-                            trap.updateCenter(to.getBlock());
+                        boolean shouldBypass = true;
+
+                        for (int i = 1; i <= 2; i++) {
+                            if (face1.getRelative(BlockFace.UP, i).getType().isSolid()
+                                    || face2.getRelative(BlockFace.UP, i).getType().isSolid()) {
+                                shouldBypass = false;
+                                break;
+                            }
+                        }
+
+                        if (shouldBypass && (face1.isEmpty() || manager.isFenceType(face1))
+                                && (face2.isEmpty() || manager.isFenceType(face2))) {
+                            removeTrap(player);
                             return;
                         }
                     }
@@ -139,28 +149,21 @@ public class PlayerMoveTracker implements Listener {
                     event.setTo(center);
                 }
             } else {
-                trap.updateCenter(to.getBlock());
+                removeTrap(player);
             }
         } else {
-            manager.removeTrap(player);
-            trap.undo();
+            removeTrap(player);
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerDeath(PlayerDeathEvent event) {
-        Trap trap = manager.removeTrap(event.getEntity());
-        if (trap != null) {
-            trap.undo();
-        }
+        removeTrap(event.getEntity());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onRespawn(PlayerRespawnEvent event) {
-        Trap trap = manager.removeTrap(event.getPlayer());
-        if (trap != null) {
-            trap.undo();
-        }
+        removeTrap(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -191,15 +194,18 @@ public class PlayerMoveTracker implements Listener {
                             to.getYaw(), to.getPitch()));
                 }
 
-                manager.removeTrap(player);
-                trap.undo();
+                removeTrap(player);
             }
         }
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        Trap trap = manager.removeTrap(event.getPlayer());
+        removeTrap(event.getPlayer());
+    }
+
+    public void removeTrap(Player player) {
+        Trap trap = manager.removeTrap(player);
         if (trap != null) {
             trap.undo();
         }
