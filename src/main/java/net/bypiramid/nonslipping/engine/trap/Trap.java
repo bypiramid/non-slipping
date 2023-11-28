@@ -25,6 +25,10 @@ public class Trap {
         return walls;
     }
 
+    public void setCenter(Block block) {
+        this.center = block;
+    }
+
     public void addWall(Block block) {
         walls.add(block);
     }
