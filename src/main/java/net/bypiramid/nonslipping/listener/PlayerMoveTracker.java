@@ -5,6 +5,7 @@ import net.bypiramid.nonslipping.engine.manager.Manager;
 import net.bypiramid.nonslipping.engine.trap.Trap;
 import net.bypiramid.nonslipping.util.BiReference;
 import net.bypiramid.nonslipping.util.BlockUtils;
+import net.minecraft.server.v1_8_R3.MathHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -19,6 +20,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.util.Vector;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -47,6 +49,8 @@ public class PlayerMoveTracker implements Listener {
 
         boolean flyEnabled = player.isFlying();
         Trap trap = manager.getOrCreate(player, from);
+
+        double xz = MathHelper.cos((float) (event.getTo().getYaw() * Math.PI / 180.0D));
 
         if (trap == null) {
             return;
@@ -110,40 +114,56 @@ public class PlayerMoveTracker implements Listener {
 
                         event.setTo(center);
                     }
+                } else {
+                    trap.setCenter(to.getBlock());
                 }
             } else if (trap.getCenter().getRelative(BlockFace.UP, 2).getType().isSolid()) {
-                BlockFace facing = yawToFace(to.getYaw()).getOppositeFace();
-
-                if (facing.name().contains("_")) {
-                    Block base = trap.getCenter().getRelative(BlockFace.DOWN);
-                    Block inDirection = base.getRelative(facing);
-
-                    BiReference<BlockFace, BlockFace> reference = getBlockFace(facing);
-
-                    if (reference != null && !manager.isFenceType(inDirection)) {
-                        Block face1 = inDirection.getRelative(reference.getRefA());
-                        Block face2 = inDirection.getRelative(reference.getRefB());
-
-                        boolean shouldBypass = true;
-
-                        for (int i = 1; i <= 2; i++) {
-                            if (face1.getRelative(BlockFace.UP, i).getType().isSolid()
-                                    || face2.getRelative(BlockFace.UP, i).getType().isSolid()) {
-                                shouldBypass = false;
-                                break;
-                            }
-                        }
-
-                        if (shouldBypass && (face1.isEmpty() || manager.isFenceType(face1))
-                                && (face2.isEmpty() || manager.isFenceType(face2))) {
-                            removeTrap(player);
-                            return;
-                        }
-                    }
-                }
-
                 if (BlockUtils.x_zDistance(center = BlockUtils.getBlockCenter(trap.getCenter()), to)
                         > MAX_DISTANCE_MOVABLE_INSIDE_TRAP) {
+                    BlockFace facing = yawToFace(to.getYaw()).getOppositeFace();
+
+                    if (facing != null && facing.name().contains("_")) {
+                        Block base = trap.getCenter().getRelative(BlockFace.DOWN);
+
+                        Location centered = trap.getCenter().getLocation();
+
+                        Block target = base.getRelative(facing);
+                        Block opposite = base.getRelative(facing.getOppositeFace());
+
+                        double targetDistance = BlockUtils.x_zDistance(target.getLocation(), to);
+                        double oppositeDistance = BlockUtils.x_zDistance(opposite.getLocation(), to);
+
+                        boolean changeToOpposite = false;
+                        if (targetDistance
+                                > oppositeDistance) {
+                            target = opposite;
+                            facing = facing.getOppositeFace();
+                        }
+
+                        BiReference<BlockFace, BlockFace> reference = getBlockFace(facing);
+
+                        if (reference != null && !manager.isFenceType(target)) {
+                            Block face1 = target.getRelative(reference.getRefA());
+                            Block face2 = target.getRelative(reference.getRefB());
+
+                            boolean shouldBypass = true;
+
+                            for (int i = 1; i <= 2; i++) {
+                                if (face1.getRelative(BlockFace.UP, i).getType().isSolid()
+                                        || face2.getRelative(BlockFace.UP, i).getType().isSolid()) {
+                                    shouldBypass = false;
+                                    break;
+                                }
+                            }
+
+                            if (shouldBypass && (face1.isEmpty() || manager.isFenceType(face1))
+                                    && (face2.isEmpty() || manager.isFenceType(face2))) {
+                                trap.setCenter(to.getBlock());
+                                return;
+                            }
+                        }
+                    }
+
                     center.setYaw(to.getYaw());
                     center.setPitch(to.getPitch());
                     event.setTo(center);
@@ -151,8 +171,6 @@ public class PlayerMoveTracker implements Listener {
             } else {
                 removeTrap(player);
             }
-        } else {
-            removeTrap(player);
         }
     }
 
