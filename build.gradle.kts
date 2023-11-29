@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "net.bypiramid.nonslipping"
-version = "2.5-SNAPSHOT"
+version = "3.0"
 description = "Intelligent engineering that identifies your prison in blocks with no escape conditions."
 
 val pluginName: String by extra { "NonSlipping" }
